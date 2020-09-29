@@ -2,7 +2,7 @@ from sklearn.linear_model import LogisticRegression
 import argparse
 import os
 import numpy as np
-from sklearn.metrics import mean_squared_error
+from sklearn.metrics import mean_squared_error, confusion_matrix
 import joblib
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import OneHotEncoder
@@ -67,6 +67,15 @@ def main():
 
     accuracy = model.score(x_test, y_test)
     run.log("Accuracy", np.float(accuracy))
+    value = {
+       "schema_type": "confusion_matrix",
+       "schema_version": "v1",
+       "data": {
+           "class_labels": ["0", "1"],
+           "matrix": confusion_matrix(y_test, model.predict(x_test)).tolist()
+       }
+    }
+    run.log_confusion_matrix(name='Confusion Matrix', value=value)
     os.makedirs('outputs', exist_ok=True)
     # note file saved in the outputs folder is automatically uploaded into experiment record
     joblib.dump(value=model, filename='outputs/model.pkl')
